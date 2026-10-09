@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Çokgenin Anatomisi - Geobek</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;900&display=swap');
+
+        * { 
+            box-sizing: border-box; margin: 0; padding: 0; 
+            user-select: none; -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ebd4ff 0%, #c4e0ff 100%);
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+            color: #34495e; padding-bottom: 20px; overflow-x: hidden; width: 100vw;
+        }
+
+        /* KİMLİK KUTUSU */
+        .identity-box {
+            background: #ffffff; border: 2px dashed #b074ff; border-radius: 15px;
+            padding: 5px 20px; margin-top: 10px; margin-bottom: 10px;
+            display: flex; flex-direction: column; align-items: center; gap: 3px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); z-index: 10; max-width: 90%;
+        }
+        .id-name { color: #34495e; font-size: 1.1rem; font-weight: 700; text-align: center;}
+        .id-handle { 
+            background: #ff6b81; color: #ffffff; font-size: 0.85rem; font-weight: 700; 
+            padding: 4px 15px; border-radius: 12px; text-decoration: none;
+            box-shadow: 0 3px 0 #d63031; transition: all 0.1s; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; pointer-events: auto;
+        }
+        .id-handle:active { transform: translateY(3px); box-shadow: 0 0 0 transparent; }
+
+        .header { text-align: center; margin-bottom: 5px; width: 100%; padding: 0 10px; z-index: 10; }
+        .title { font-size: 1.8rem; font-weight: 900; color: #b074ff; text-shadow: 1px 1px 0 #fff; margin-bottom: 5px;}
+        
+        .progress-badge { 
+            font-size: 1.1rem; font-weight: 800; color: #00bcd4; background: #fff; 
+            padding: 6px 20px; border-radius: 20px; display: inline-block; 
+            border: 2px dashed #00bcd4; box-shadow: 0 4px 0 #0097a7; margin-bottom: 10px; z-index: 10;
+        }
+
+        /* OYUN ALANI DÜZENİ */
+        .game-layout {
+            display: flex; flex-direction: column; width: 95%; max-width: 1100px; z-index: 10; gap: 12px; align-items: center;
+        }
+
+        .svg-panel {
+            background: #ffffff; border: 3px solid #b074ff; border-radius: 20px;
+            padding: 10px; display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 6px 0 #8e44ad; width: 100%; max-width: 320px; aspect-ratio: 1;
+            order: -1; margin-bottom: 5px;
+        }
+        
+        svg { width: 100%; height: 100%; overflow: visible; }
+
+        .btn-col {
+            display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%;
+            background: #ffffff; padding: 15px 10px; border-radius: 15px; border: 3px solid #00bcd4;
+            box-shadow: 0 6px 0 #0097a7;
+        }
+
+        .col-title { width: 100%; text-align: center; font-size: 1.2rem; font-weight: 800; color: #b074ff; margin-bottom: 5px; }
+        .col-title.right { color: #ff6b81; }
+
+        .opt-btn {
+            background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 10px; padding: 10px 5px;
+            font-family: 'Fredoka'; font-size: 1rem; font-weight: 700; color: #34495e;
+            cursor: pointer; box-shadow: 0 4px 0 #94a3b8; transition: all 0.1s; text-align: center;
+            flex: 1 1 30%; min-width: 85px; 
+        }
+        .opt-btn:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+        
+        .opt-btn.selected-poly { background: #00bcd4; border-color: #0097a7; color: #fff; box-shadow: 0 4px 0 #006064; }
+        .opt-btn.selected-elem { background: #b074ff; border-color: #8e44ad; color: #fff; box-shadow: 0 4px 0 #732d91; }
+        .opt-btn.correct { background: #2ecc71 !important; border-color: #27ae60 !important; color: #fff !important; box-shadow: 0 4px 0 #1e8449 !important; }
+        .opt-btn.wrong { background: #ff6b81 !important; border-color: #d63031 !important; color: #fff !important; box-shadow: 0 4px 0 #b33939 !important; }
+
+        /* PARLAYAN ELEMAN EFEKTİ */
+        .glow-element { animation: pulse-glow 0.8s infinite alternate; transform-origin: center; }
+        @keyframes pulse-glow {
+            0% { filter: drop-shadow(0 0 2px #ff6b81); stroke-width: 6; }
+            100% { filter: drop-shadow(0 0 8px #ff6b81) drop-shadow(0 0 12px #ff6b81); stroke-width: 10; }
+        }
+
+        .glow-angle { animation: pulse-angle 0.8s infinite alternate; transform-origin: center; }
+        @keyframes pulse-angle {
+            0% { filter: drop-shadow(0 0 2px #f39c12); }
+            100% { filter: drop-shadow(0 0 8px #f1c40f); }
+        }
+
+        .base-poly { stroke: #00bcd4; stroke-width: 5; fill: #e0f7fa; stroke-linejoin: round;}
+
+        /* SONUÇ EKRANI */
+        #result-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.98); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.4s; text-align: center; padding: 20px;
+        }
+        
+        .res-title { font-size: 2.5rem; color: #00bcd4; font-weight: 900; margin-bottom: 15px; text-shadow: 2px 2px 0 #fff;}
+        .res-desc { font-size: 1.2rem; color: #34495e; font-weight: 700; max-width: 90%; line-height: 1.5; margin-bottom: 25px;}
+        
+        .btn-main { 
+            background: #b074ff; color: white; border: none; padding: 15px 30px; font-family: 'Fredoka'; 
+            font-weight: 800; font-size: 1.3rem; border-radius: 15px; cursor: pointer; box-shadow: 0 5px 0 #8e44ad;
+        }
+        .btn-main:active { transform: translateY(5px); box-shadow: 0 0 0 transparent; }
+
+        #confetti { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:150;}
+
+        @media (min-width: 900px) {
+            .title { font-size: 2.2rem; }
+            .identity-box { padding: 8px 30px; }
+            .game-layout { flex-direction: row; justify-content: space-between; max-width: 1200px; gap: 20px;}
+            .svg-panel { order: 0; flex: 1; max-width: 450px; margin: 0 20px; padding: 20px; border-width: 4px; box-shadow: 0 8px 0 #8e44ad;}
+            .btn-col { flex-direction: column; width: 260px; padding: 20px; border-width: 4px; box-shadow: 0 8px 0 #0097a7; flex-wrap: nowrap;}
+            .col-title { font-size: 1.4rem; margin-bottom: 10px; }
+            .opt-btn { font-size: 1.3rem; padding: 15px 10px; flex: none; min-width: unset; border-width: 3px; box-shadow: 0 5px 0 #94a3b8;}
+            .opt-btn:active { transform: translateY(5px); box-shadow: 0 0 0 transparent; }
+            .res-title { font-size: 4rem; }
+            .res-desc { font-size: 1.5rem; max-width: 80%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="identity-box">
+        <div class="id-name">Bekir DEMİREL</div>
+        <a href="https://www.instagram.com/matejital_mt25" target="_blank" class="id-handle">📷 @matejital_mt25</a>
+    </div>
+
+    <div class="header">
+        <div class="title">Çokgenin Anatomisi 📐</div>
+    </div>
+    <div class="progress-badge">Soru: <span id="qCount">1</span> / 15</div>
+
+    <div class="game-layout">
+        <div class="btn-col">
+            <div class="col-title">Çokgenin Adı Ne?</div>
+            <button class="opt-btn poly-btn" data-val="3">Üçgen</button>
+            <button class="opt-btn poly-btn" data-val="4">Dörtgen</button>
+            <button class="opt-btn poly-btn" data-val="5">Beşgen</button>
+            <button class="opt-btn poly-btn" data-val="6">Altıgen</button>
+            <button class="opt-btn poly-btn" data-val="7">Yedigen</button>
+            <button class="opt-btn poly-btn" data-val="8">Sekizgen</button>
+        </div>
+
+        <div class="svg-panel">
+            <svg viewBox="0 0 300 300" id="polySvg"></svg>
+        </div>
+
+        <div class="btn-col" style="border-color: #ff6b81; box-shadow: 0 6px 0 #d63031;">
+            <div class="col-title right">Yanan Eleman Ne?</div>
+            <button class="opt-btn elem-btn" data-val="kenar">Kenar</button>
+            <button class="opt-btn elem-btn" data-val="kose">Köşe</button>
+            <button class="opt-btn elem-btn" data-val="icAci">İç Açı</button>
+            <button class="opt-btn elem-btn" data-val="disAci">Dış Açı</button>
+            <button class="opt-btn elem-btn" data-val="kosegen" id="btnKosegen">Köşegen</button>
+        </div>
+    </div>
+
+    <div id="result-screen">
+        <div class="res-title">Harika İş Çıkardın! 🏆</div>
+        <div class="res-desc">
+            Çokgenlerin anatomisini tamamen çözdün. Sen bir geometri uzmanısın!
+        </div>
+        <button class="btn-main" onclick="location.reload()">Tekrar Oyna 🔄</button>
+    </div>
+
+    <canvas id="confetti"></canvas>
+
+    <script>
+        // GLOBAL SES MOTORU (Sayfa yüklenir yüklenmez hazırlanır)
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        // AGRESİF KİLİT KIRICI: Ekrana ilk dokunuşta zorla kilidi açar
+        function forceUnlockAudio() {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            gain.gain.value = 0; // Duyulmaz ses
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(0);
+            osc.stop(audioCtx.currentTime + 0.1);
+
+            // Kilidi kırdıktan sonra olay dinleyicilerini sil
+            ['touchstart', 'touchend', 'mousedown', 'keydown', 'click'].forEach(evt => {
+                document.removeEventListener(evt, forceUnlockAudio);
+            });
+        }
+
+        // Tüm olası ilk etkileşimlere kilit kırıcıyı bağla
+        ['touchstart', 'touchend', 'mousedown', 'keydown', 'click'].forEach(evt => {
+            document.addEventListener(evt, forceUnlockAudio, { once: true });
+        });
+
+        // SES ÇALMA FONKSİYONU
+        window.playSound = function(type) {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator(); 
+                const gain = audioCtx.createGain();
+                osc.connect(gain); 
+                gain.connect(audioCtx.destination);
+                
+                if (type === 'select') {
+                    osc.type = 'sine'; 
+                    osc.frequency.setValueAtTime(600, now); 
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                    gain.gain.setValueAtTime(0.3, now); 
+                    gain.gain.linearRampToValueAtTime(0, now + 0.1);
+                    osc.start(now); osc.stop(now + 0.1);
+                } 
+                else if (type === 'correct') {
+                    osc.type = 'triangle'; 
+                    osc.frequency.setValueAtTime(600, now); 
+                    osc.frequency.exponentialRampToValueAtTime(1600, now + 0.3);
+                    gain.gain.setValueAtTime(0.5, now); 
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now); osc.stop(now + 0.3);
+                } 
+                else if (type === 'wrong') {
+                    osc.type = 'sawtooth'; 
+                    osc.frequency.setValueAtTime(200, now); 
+                    osc.frequency.linearRampToValueAtTime(100, now + 0.4);
+                    gain.gain.setValueAtTime(0.4, now); 
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    osc.start(now); osc.stop(now + 0.4);
+                } 
+                else if (type === 'win') {
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                        const o = audioCtx.createOscillator(); 
+                        const g = audioCtx.createGain();
+                        o.type = 'square'; 
+                        o.connect(g); 
+                        g.connect(audioCtx.destination);
+                        o.frequency.value = freq; 
+                        g.gain.setValueAtTime(0, now + i * 0.15);
+                        g.gain.linearRampToValueAtTime(0.3, now + i * 0.15 + 0.05); 
+                        g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.15 + 0.4);
+                        o.start(now + i * 0.15); o.stop(now + i * 0.15 + 0.4);
+                    });
+                }
+            } catch(e) { console.log(e); }
+        }
+
+        // --- OYUN MEKANİĞİ ---
+        const MAX_Q = 15;
+        let currentQ = 1;
+        let targetPoly = null; 
+        let targetElem = null; 
+        let selPolyBtn = null;
+        let selElemBtn = null;
+        let isEvaluating = false;
+
+        // BUTONLARA SES EKLENDİ
+        document.querySelectorAll('.poly-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if(isEvaluating) return;
+                forceUnlockAudio(); // Ekstra güvenlik
+                playSound('select');
+                document.querySelectorAll('.poly-btn').forEach(b => b.classList.remove('selected-poly'));
+                btn.classList.add('selected-poly');
+                selPolyBtn = btn;
+                checkAnswer();
+            });
+        });
+
+        document.querySelectorAll('.elem-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if(isEvaluating) return;
+                forceUnlockAudio(); // Ekstra güvenlik
+                playSound('select');
+                document.querySelectorAll('.elem-btn').forEach(b => b.classList.remove('selected-elem'));
+                btn.classList.add('selected-elem');
+                selElemBtn = btn;
+                checkAnswer();
+            });
+        });
+
+        function getVector(p1, p2) {
+            let dx = p2.x - p1.x; let dy = p2.y - p1.y;
+            let len = Math.sqrt(dx*dx + dy*dy);
+            return { x: dx/len, y: dy/len };
+        }
+
+        function generateQuestion() {
+            targetPoly = Math.floor(Math.random() * 6) + 3;
+            let elements = ['kenar', 'kose', 'icAci', 'disAci'];
+            if (targetPoly > 3) elements.push('kosegen');
+            
+            const btnK = document.getElementById('btnKosegen');
+            if(targetPoly === 3) {
+                btnK.style.opacity = '0.3'; btnK.style.pointerEvents = 'none';
+            } else {
+                btnK.style.opacity = '1'; btnK.style.pointerEvents = 'auto';
+            }
+
+            targetElem = elements[Math.floor(Math.random() * elements.length)];
+            drawSVG(targetPoly, targetElem);
+        }
+
+        function drawSVG(n, elemType) {
+            const svg = document.getElementById('polySvg');
+            const cx = 150, cy = 150, r = 100;
+            let v = [];
+
+            for(let i=0; i<n; i++) {
+                let angle = (2 * Math.PI * i / n) - (Math.PI / 2);
+                v.push({ x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) });
+            }
+
+            let pathD = `M ${v[0].x} ${v[0].y} `;
+            for(let i=1; i<n; i++) pathD += `L ${v[i].x} ${v[i].y} `;
+            pathD += "Z";
+
+            let html = `<g transform="rotate(${Math.floor(Math.random()*360)} 150 150)">`;
+            html += `<path d="${pathD}" class="base-poly" />`;
+
+            if (elemType === 'kenar') {
+                html += `<line x1="${v[0].x}" y1="${v[0].y}" x2="${v[1].x}" y2="${v[1].y}" stroke="#ff6b81" class="glow-element"/>`;
+            } else if (elemType === 'kose') {
+                html += `<circle cx="${v[0].x}" cy="${v[0].y}" r="12" fill="#ff6b81" class="glow-element"/>`;
+            } else if (elemType === 'kosegen') {
+                html += `<line x1="${v[0].x}" y1="${v[0].y}" x2="${v[2].x}" y2="${v[2].y}" stroke="#ff6b81" stroke-dasharray="8,6" class="glow-element"/>`;
+            } else if (elemType === 'icAci') {
+                let prev = v[n-1], curr = v[0], next = v[1];
+                let vPrev = getVector(curr, prev), vNext = getVector(curr, next);
+                let p1 = { x: curr.x + vPrev.x*35, y: curr.y + vPrev.y*35 };
+                let p2 = { x: curr.x + vNext.x*35, y: curr.y + vNext.y*35 };
+                let midVec = getVector({x:0, y:0}, {x: vPrev.x + vNext.x, y: vPrev.y + vNext.y});
+                let pMid = { x: curr.x + midVec.x*40, y: curr.y + midVec.y*40 };
+                html += `<path d="M ${curr.x} ${curr.y} L ${p1.x} ${p1.y} Q ${pMid.x} ${pMid.y} ${p2.x} ${p2.y} Z" fill="#f1c40f" class="glow-angle" opacity="0.9"/>`;
+            } else if (elemType === 'disAci') {
+                let prev = v[n-1], curr = v[0], next = v[1];
+                let vExt = getVector(prev, curr);
+                let extFar = { x: curr.x + vExt.x*45, y: curr.y + vExt.y*45 };
+                let vNext = getVector(curr, next);
+                let p1 = { x: curr.x + vExt.x*30, y: curr.y + vExt.y*30 };
+                let p2 = { x: curr.x + vNext.x*30, y: curr.y + vNext.y*30 };
+                let midVec = getVector({x:0, y:0}, {x: vExt.x + vNext.x, y: vExt.y + vNext.y});
+                let pMid = { x: curr.x + midVec.x*35, y: curr.y + midVec.y*35 };
+                html += `<line x1="${curr.x}" y1="${curr.y}" x2="${extFar.x}" y2="${extFar.y}" stroke="#34495e" stroke-width="4" stroke-dasharray="5,5" />`;
+                html += `<path d="M ${curr.x} ${curr.y} L ${p1.x} ${p1.y} Q ${pMid.x} ${pMid.y} ${p2.x} ${p2.y} Z" fill="#ff6b81" class="glow-element" opacity="0.9"/>`;
+            }
+            html += `</g>`;
+            svg.innerHTML = html;
+        }
+
+        function checkAnswer() {
+            if (!selPolyBtn || !selElemBtn) return; 
+
+            isEvaluating = true;
+            let ansPoly = parseInt(selPolyBtn.getAttribute('data-val'));
+            let ansElem = selElemBtn.getAttribute('data-val');
+
+            if (ansPoly === targetPoly && ansElem === targetElem) {
+                playSound('correct'); // DOĞRU CEVAP SESİ
+                selPolyBtn.classList.add('correct');
+                selElemBtn.classList.add('correct');
+                fireConfettiSmall();
+
+                setTimeout(() => {
+                    resetSelection();
+                    if (currentQ >= MAX_Q) {
+                        endGame();
+                    } else {
+                        currentQ++;
+                        document.getElementById('qCount').innerText = currentQ;
+                        generateQuestion();
+                        isEvaluating = false;
+                    }
+                }, 800);
+            } else {
+                playSound('wrong'); // YANLIŞ CEVAP SESİ
+                if (ansPoly !== targetPoly) { selPolyBtn.classList.add('wrong'); selPolyBtn.style.animation = "shakeErr 0.4s"; }
+                if (ansElem !== targetElem) { selElemBtn.classList.add('wrong'); selElemBtn.style.animation = "shakeErr 0.4s"; }
+
+                setTimeout(() => { resetSelection(); isEvaluating = false; }, 800);
+            }
+        }
+
+        function resetSelection() {
+            document.querySelectorAll('.opt-btn').forEach(btn => {
+                btn.classList.remove('selected-poly', 'selected-elem', 'correct', 'wrong');
+                btn.style.animation = "";
+            });
+            selPolyBtn = null; selElemBtn = null;
+        }
+
+        function endGame() {
+            playSound('win'); // OYUN BİTİŞ SESİ
+            document.getElementById('result-screen').style.opacity = '1';
+            document.getElementById('result-screen').style.pointerEvents = 'auto';
+            fireConfettiBig();
+        }
+
+        let particles = []; const confCanvas = document.getElementById('confetti'); const confCtx = confCanvas.getContext('2d'); let confTimer;
+        
+        function fireConfettiSmall() {
+            cancelAnimationFrame(confTimer); particles = []; confCanvas.width = window.innerWidth; confCanvas.height = window.innerHeight;
+            for(let i=0; i<40; i++) particles.push({ x: confCanvas.width/2, y: confCanvas.height/2, r: Math.random()*5+3, dx: Math.random()*20-10, dy: -(Math.random()*15+5), color: ['#f1c40f', '#00bcd4', '#2ecc71', '#b074ff'][Math.floor(Math.random()*4)] });
+            animateParticles();
+        }
+
+        function fireConfettiBig() {
+            cancelAnimationFrame(confTimer); particles = []; confCanvas.width = window.innerWidth; confCanvas.height = window.innerHeight;
+            for(let i=0; i<200; i++) particles.push({ x: confCanvas.width/2, y: confCanvas.height, r: Math.random()*8+4, dx: Math.random()*40-20, dy: -(Math.random()*30+15), color: ['#ff6b81', '#00bcd4', '#f1c40f', '#2ecc71', '#b074ff'][Math.floor(Math.random()*5)] });
+            animateParticles();
+        }
+
+        function animateParticles() {
+            confCtx.clearRect(0,0,confCanvas.width,confCanvas.height); let active = false;
+            particles.forEach(p => { p.x += p.dx; p.y += p.dy; p.dy += 0.6; if(p.y < confCanvas.height) active = true; confCtx.beginPath(); confCtx.arc(p.x, p.y, p.r, 0, Math.PI*2); confCtx.fillStyle = p.color; confCtx.fill(); });
+            if(active) confTimer = requestAnimationFrame(animateParticles); else confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
+        }
+
+        // Oyun sayfa yüklendiğinde otomatik olarak başlar
+        generateQuestion();
+
+    </script>
+</body>
+</html>
